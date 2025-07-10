@@ -1,0 +1,196 @@
+<div class="navbar">
+  <style>
+    .navbar {
+      display: flex;
+      align-items: center;
+      background-color: #333;
+      color: white;
+      padding: 0 1rem;
+      height: 60px;
+    }
+
+    .nav-items {
+      display: flex;
+      /* 修改为允许水平滚动 */
+      overflow-x: auto; 
+      white-space: nowrap; 
+      flex-wrap: nowrap;
+    }
+
+    .nav-item {
+      padding: 0 1rem;
+      white-space: nowrap;
+      cursor: pointer;
+      height: 60px;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-item:hover {
+      background-color: #555;
+    }
+
+    /* 添加高亮样式 */
+    .nav-item.active {
+      background-color: #555;
+    }
+
+    .more-btn {
+      display: none;
+      padding: 0 1rem;
+      cursor: pointer;
+      height: 60px;
+      align-items: center;
+    }
+
+    .dropdown {
+      position: relative;
+      z-index: 100;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #333;
+      min-width: 160px;
+      z-index: 1;
+      right: 0;
+      top: 60px;
+    }
+
+    .dropdown-content .nav-item {
+      padding: 0.75rem 1rem;
+      height: auto;
+    }
+
+    .show {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .nav-item {
+        padding: 0 0.75rem;
+      }
+    }
+  </style>
+  <div class="nav-items" id="visibleNavItems"></div>
+  <div class="dropdown">
+    <div class="more-btn" id="moreBtn">更多</div>
+    <div class="dropdown-content" id="dropdownContent"></div>
+  </div>
+</div>
+<script>
+  // 示例导航数据
+  let navData = [];
+
+  const visibleNavItems = document.getElementById('visibleNavItems');
+  const dropdownContent = document.getElementById('dropdownContent');
+  const moreBtn = document.getElementById('moreBtn');
+
+  function renderNavbar() {
+    let visibleNavItemsHTML = '';
+    dropdownContent.innerHTML = '';
+
+    // 渲染所有导航项到可见区域
+    navData.forEach(item => {
+      const navItem = `<div class="nav-item" data-id="${item.chi_gua_zo_fe_lei_fe_lei_id}">${item.chi_gua_zo_fe_lei_fe_lei_ming}</div>`;
+      visibleNavItemsHTML += navItem;
+    });
+    visibleNavItems.innerHTML = visibleNavItemsHTML;
+
+    // 检查是否需要显示更多按钮
+    if (visibleNavItems.scrollWidth > visibleNavItems.clientWidth) {
+      moreBtn.style.display = 'flex';
+    } else {
+      moreBtn.style.display = 'none';
+    }
+
+    // 为每一个菜单栏添加点击事件
+    addClickEvents();
+  }
+
+  // 添加点击事件
+  function addClickEvents() {
+    const allNavItems = document.querySelectorAll('.nav-item');
+    allNavItems.forEach(item => {
+      item.addEventListener("click", () => {
+        // 移除所有导航项的高亮样式
+        allNavItems.forEach(navItem => {
+          navItem.classList.remove('active');
+        });
+        // 为当前点击的导航项添加高亮样式
+        item.classList.add('active');
+        console.log(item);
+        
+        nav_click(item.dataset.id);
+      });
+    });
+  }
+
+  // 定义一个函数用来确定获取哪一个线路的分类
+  async function get_category(line_id) {
+    // 如果 line_id 没有传入参数,立刻返回
+    if (!line_id) {
+      console.log("%c 没有传入线路id", "color: red;");
+      return;
+    }
+
+    let res = await axios({
+      url: `/api/${line_id}/classifications/`,
+    });
+
+    // 渲染页面
+    // 初始渲染
+    navData = res.data.data;
+    renderNavbar();
+    return res.data;
+  }
+
+  // 窗口大小改变时重新渲染
+  window.addEventListener('resize', renderNavbar);
+
+  // 更多按钮点击事件
+  moreBtn.addEventListener('click', () => {
+    dropdownContent.innerHTML = '';
+    const navItems = visibleNavItems.querySelectorAll('.nav-item');
+    const visibleNavItemsRect = visibleNavItems.getBoundingClientRect();
+
+    navItems.forEach(item => {
+      const itemRect = item.getBoundingClientRect();
+      if (itemRect.left >= visibleNavItemsRect.right || itemRect.right <= visibleNavItemsRect.left) {
+        const cloneItem = item.cloneNode(true);
+        dropdownContent.appendChild(cloneItem);
+      }
+    });
+
+    dropdownContent.classList.toggle('show');
+    // 重新添加点击事件
+    addClickEvents();
+  });
+
+  // 点击其他地方关闭下拉菜单
+  window.addEventListener('click', (e) => {
+    if (!e.target.matches('.more-btn')) {
+      dropdownContent.classList.remove('show');
+    }
+  });
+
+  // 滚动事件处理
+  visibleNavItems.addEventListener('scroll', () => {
+    if (dropdownContent.classList.contains('show')) {
+      dropdownContent.innerHTML = '';
+      const navItems = visibleNavItems.querySelectorAll('.nav-item');
+      const visibleNavItemsRect = visibleNavItems.getBoundingClientRect();
+
+      navItems.forEach(item => {
+        const itemRect = item.getBoundingClientRect();
+        if (itemRect.left >= visibleNavItemsRect.right || itemRect.right <= visibleNavItemsRect.left) {
+          const cloneItem = item.cloneNode(true);
+          dropdownContent.appendChild(cloneItem);
+        }
+      });
+      // 重新添加点击事件
+      addClickEvents();
+    }
+  });
+</script>

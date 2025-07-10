@@ -1,0 +1,74 @@
+{% extends "pc/template.html" %}
+
+{% block title %}{% endblock %}
+
+{% block css %}
+
+
+<script>
+    let nav_click;
+</script>
+{% endblock %}
+
+
+{% block body %}
+
+<div class="layui-card">
+    <div class="layui-card-header  ">
+
+        <div id="chi_gua_search" class="layui-df-jc-ac layui-table-fixed-l "></div>
+
+
+    </div>
+    <div class="layui-card-body ">
+        <!-- 分类显示 -->
+        <!-- <div class="layui-collapse" lay-accordion>
+            <div class="layui-colla-item">
+                <div class="layui-colla-title">
+                    layui 主要面向哪些用户群体？
+                </div>
+                <div class="layui-colla-content layui-show" id="nav_category_container">
+                   
+                </div>
+
+            </div>
+        </div> -->
+        {% include 'pc/组件/页面组件/分类.html' %}
+        <div class="layui-card-body">
+
+            {% include 'pc/组件/页面组件/吃瓜列表.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+{% include 'pc/组件/页面组件/吃瓜搜索.html' %}
+{% include 'pc/组件/页面组件/底部TabBar.html' %}
+<script>
+
+    nav_click = async function nav_click(id) {
+        let chi_gua_lie_biao = await get_guagua_list("{{ link_name }}", id + "1/")
+        renderGuaguaList(chi_gua_lie_biao, "{{ link_name }}")
+        renderPagination(chi_gua_lie_biao, "{{ link_name }}", id)
+    }
+</script>
+
+<script>
+
+    async function init() {
+
+        const line_id = "{{ link_name }}"
+        // 渲染分类
+        await get_category(line_id)
+        // 渲染吃瓜列表
+        let chi_gua_lie_biao = await get_guagua_list(line_id)
+        renderGuaguaList(chi_gua_lie_biao, line_id)
+        renderPagination(chi_gua_lie_biao, line_id)
+    }
+    init()
+
+
+</script>
+
+{% endblock %}

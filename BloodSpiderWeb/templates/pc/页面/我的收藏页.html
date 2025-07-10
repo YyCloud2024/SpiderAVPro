@@ -1,0 +1,439 @@
+{% extends "pc/template.html" %}
+
+{% block title %}我的收藏{% endblock %}
+
+{% block css %}
+<style>
+    .guagua-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 24px;
+        padding: 10px 0;
+    }
+
+    .guagua-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        background: #222;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+        cursor: pointer;
+        transition: box-shadow 0.2s;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .guagua-card:hover {
+        box-shadow: 0 6px 24px rgba(30, 159, 255, 0.18);
+    }
+
+    .guagua-cover {
+        width: 100%;
+        aspect-ratio: 3/2;
+        object-fit: cover;
+        display: block;
+        background: #333;
+    }
+
+    .guagua-card-info {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        background: linear-gradient(0deg, rgba(0, 0, 0, 0.65) 80%, rgba(0, 0, 0, 0.1) 100%);
+        z-index: 2;
+        padding-top: 32px;
+        box-sizing: border-box;
+    }
+
+    .guagua-title {
+        font-size: 16px;
+        color: #fff;
+        font-weight: bold;
+        padding: 0 14px 0 14px;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: box;
+        box-orient: vertical;
+        margin-bottom: 8px;
+    }
+
+    .guagua-meta {
+        font-size: 13px;
+        color: #fff;
+        opacity: 0.92;
+        padding: 0 14px 12px 14px;
+        line-height: 1.4;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+    }
+
+    .guagua-card .select-checkbox {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 22px;
+        height: 22px;
+        z-index: 3;
+        display: none;
+        appearance: none;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        background: #fff;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .guagua-card .select-checkbox:checked {
+        background-color: #1E9FFF;
+        border-color: #1E9FFF;
+    }
+
+    .guagua-card .select-checkbox:checked::after {
+        content: '';
+        position: absolute;
+        left: 7px;
+        top: 3px;
+        width: 6px;
+        height: 12px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .delete-operation-bar {
+        display: none;
+        justify-content: center;
+        gap: 15px;
+        margin: 20px 0;
+        padding: 15px;
+        background-color: #f5f5f5;
+        border-radius: 8px;
+    }
+
+    .delete-operation-bar button {
+        padding: 8px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .delete-all-btn {
+        background-color: #FF5722;
+        color: white;
+    }
+
+    .delete-selected-btn {
+        background-color: #1E9FFF;
+        color: white;
+    }
+
+    .guagua-empty {
+        text-align: center;
+        color: #aaa;
+        padding: 60px 0;
+        font-size: 18px;
+    }
+
+    .guagua-pagination {
+        text-align: center;
+        margin: 30px 0 20px 0;
+    }
+
+    .guagua-pagination button {
+        margin: 0 8px;
+        padding: 6px 16px;
+        border: none;
+        border-radius: 4px;
+        background: #1E9FFF;
+        color: #fff;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .guagua-pagination button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    .guagua-pagination .page-info {
+        margin: 0 10px;
+        color: #555;
+    }
+</style>
+{% endblock %}
+
+
+{% block body %}
+{% include 'pc/组件/页面组件/普通返回组件.html' %}
+{% include 'pc/组件/页面组件/底部TabBar.html' %}
+<div class="layui-card">
+    <div class="layui-card-header">
+        <blockquote class="layui-elem-quote">
+            我的收藏列表
+        </blockquote>
+    </div>
+    <div class="layui-card-body">
+        <div id="guaguaListContainer"></div>
+        <div class="guagua-pagination" id="guaguaPagination"></div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block js %}
+
+
+<script>
+    layui.use(function () {
+        var util = layui.util;
+        var layer = layui.layer;
+        util.fixbar({
+            bars: [
+                    {
+                        type: 'chu',
+                        content: '出',
+                    },
+                    {
+                        type: 'dao',
+                        content: '入',
+                    },
+                    {
+                        type: 'delete',
+                        content: '删',
+                    }
+                ],
+            click: function (type) {
+                console.log(this, type);
+                layer.msg(type);
+                switch (type) {
+                    case "chu":
+                        if (localStorage.getItem("chi_gua_collect")) {
+                            var index = layer.open({
+                                type: 1,
+                                title: "Hi 这是您的导出数据,请复制并保存好,APP不提供储存服务~喵",
+                                // area: ['420px', '240px'], // 宽高
+                                content: `
+                        ${localStorage.getItem("chi_gua_collect")}
+                            `,
+                                btn: ["复制"],
+                                btn1: () => {
+                                    console.log("点击了复制");
+                                    copyToClipboard(localStorage.getItem("chi_gua_collect"));
+                                    layer.msg("复制完成,记得保存喔~")
+                                    // 关闭 prompt
+                                    layer.close(index);
+                                }
+                            });
+                        }
+                        break;
+                    case "dao":
+                        console.log("开始导入");
+                        layer.prompt({ title: '请输入导入的数据', formType: 2, maxlength: 1000000000 }, function (value, index, elem) {
+                            if (value === '') return elem.focus();
+                            // 解密数据
+                            const decryptedValue = window.BloodSpider_decrypt(util.escape(value));
+                            if (!decryptedValue) {
+                                layer.msg("解密失败，导入数据为空");
+                                return;
+                            }
+
+                            // 尝试解析JSON
+                            let new_data;
+                            try {
+                                new_data = JSON.parse(decryptedValue);
+                            } catch (e) {
+                                layer.msg("解密失败或数据格式错误，无法解析JSON");
+                                return;
+                            }
+
+                            // 判断本地有没有数据
+                            if (localStorage.getItem("chi_gua_collect")) {
+                                // 追加
+                                let old_data = JSON.parse(localStorage.getItem("chi_gua_collect"));
+                                  
+                                // 提取现有数据的ID集合用于去重
+                                const existingIds = new Set();
+                                old_data.forEach(item => {
+                                    const cardId = item.chi_gua_lie_biao_cover.split('/').slice(3).join('').split('.')[0];
+                                    existingIds.add(cardId);
+                                });
+                                  
+                                // 过滤新数据，只保留不存在的项
+                                const uniqueNewData = new_data.filter(item => {
+                                    const cardId = item.chi_gua_lie_biao_cover.split('/').slice(3).join('').split('.')[0];
+                                    return !existingIds.has(cardId);
+                                });
+                                  
+                                // 只添加新数据
+                                if (uniqueNewData.length > 0) {
+                                    old_data.push(...uniqueNewData);
+                                    localStorage.setItem("chi_gua_collect", JSON.stringify(old_data));
+                                }
+                            } else {
+                                localStorage.setItem("chi_gua_collect", decryptedValue)
+                            }
+
+                            layer.msg("导入成功 共导入 " + new_data.length + " 条数据")
+
+
+                            // 刷新页面
+                            setTimeout(() => {
+                                location.reload()
+
+                            }, 1000);
+                            // 关闭 prompt
+                            layer.close(index);
+                        });
+                        break
+                    case 'delete':
+                        toggleDeleteMode();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        })
+
+    })
+
+    // 判断是否处于删除模式
+    function isDeleteMode() {
+        const operationBar = document.getElementById('deleteOperationBar');
+        return operationBar && operationBar.style.display === 'flex';
+    }
+
+    // 删除模式切换函数
+    function toggleDeleteMode() {
+        const checkboxes = document.querySelectorAll('.select-checkbox');
+        const operationBar = document.getElementById('deleteOperationBar');
+        
+        // 检查操作栏是否存在
+        if (!operationBar) {
+            layer.msg('没有可删除的收藏项');
+            return;
+        }
+        
+        const isVisible = checkboxes.length > 0 && checkboxes[0].style.display !== 'block';
+
+        checkboxes.forEach(checkbox => {
+            checkbox.style.display = isVisible ? 'block' : 'none';
+            // 阻止复选框点击事件冒泡
+            checkbox.onclick = e => e.stopPropagation();
+        });
+
+        operationBar.style.display = isVisible ? 'flex' : 'none';
+    }
+
+    // 删除全部收藏
+    function deleteAllCollections() {
+        layer.confirm('确定要删除全部收藏吗？', function(index) {
+            localStorage.removeItem('chi_gua_collect');
+            document.getElementById('guaguaListContainer').innerHTML = '<div class="guagua-empty layui-df-jc-ac">暂无吃瓜内容</div>';
+            toggleDeleteMode(); // 退出删除模式
+            layer.close(index);
+        });
+    }
+
+    // 删除选中收藏
+    function deleteSelectedCollections() {
+        const selectedCheckboxes = document.querySelectorAll('.select-checkbox:checked');
+        if (selectedCheckboxes.length === 0) {
+            layer.msg('请先选择要删除的收藏');
+            return;
+        }
+
+        layer.confirm(`确定要删除选中的 ${selectedCheckboxes.length} 项收藏吗？`, function(index) {
+            const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.id);
+            let allData = JSON.parse(localStorage.getItem('chi_gua_collect') || '[]');
+
+            // 过滤掉选中的项
+            allData = allData.filter(item => {
+                const cardId = item.chi_gua_lie_biao_cover.split('/').slice(3).join('').split('.')[0];
+                return !selectedIds.includes(cardId);
+            });
+
+            localStorage.setItem('chi_gua_collect', JSON.stringify(allData));
+            init(); // 重新渲染列表
+            toggleDeleteMode(); // 退出删除模式
+            layer.close(index);
+        });
+    }
+
+    function open_xiang_qing_ye(url, line_id, chi_gua_lie_biao_cover) {
+        // 把 url 进行base64编码
+        // console.log(url);
+        // console.log(line_id);
+        // console.log(chi_gua_lie_biao_cover);
+        let base64_url = btoa(url)
+        var cover = btoa(chi_gua_lie_biao_cover)
+        window.location.href = `/web/play/${line_id}/${base64_url}/?cover=${cover}`
+
+
+    }
+
+
+    async function init() {
+
+        const collectData = localStorage.getItem("chi_gua_collect");
+        if (!collectData || JSON.parse(collectData).length === 0) {
+            // <div class="guagua-empty">暂无吃瓜内容</div>
+            layer.msg("没有收藏的数据")
+            document.querySelector(".layui-card-body").innerHTML = ` <div class="guagua-empty layui-df-jc-ac">暂无吃瓜内容</div>`
+            return
+        }
+
+        let all_data = JSON.parse(localStorage.getItem("chi_gua_collect"))
+        const container = document.getElementById('guaguaListContainer');
+        console.log(all_data);
+
+
+        container.innerHTML = `
+        <div class="delete-operation-bar" id="deleteOperationBar">
+            <button class="delete-all-btn" onclick="deleteAllCollections()">删除全部</button>
+            <button class="delete-selected-btn" onclick="deleteSelectedCollections()">删除选中</button>
+        </div>
+        <div class="guagua-list">${all_data.map(item => {
+            console.log(item.chi_gua_lie_biao_cover);
+
+            let card_id = item.chi_gua_lie_biao_cover.split("/").slice(3).join('').split(".")[0]
+            var crad_html = `
+            <div class="guagua-card" data-card-id="${card_id}" onclick="if (isDeleteMode()) { this.querySelector('.select-checkbox').checked = !this.querySelector('.select-checkbox').checked; } else { open_xiang_qing_ye('${item.base_url + "/" + item.chi_guo_xiang_qing_ye_url}', '${item.link_name}', '${item.chi_gua_lie_biao_cover}'); }">
+                <input type="checkbox" class="select-checkbox" data-id="${card_id}">
+                <img class="guagua-cover card-id_${card_id} " src="${item.chi_gua_lie_biao_cover}" alt="${item.chi_gua_lie_biao_biao_ti}">
+                
+                <div class="guagua-card-info">
+                    <div class="guagua-title">${item.chi_gua_lie_biao_biao_ti}</div>
+                    <div class="guagua-meta">感谢血蜘蛛提供技术服务</div>
+                </div>
+                
+            </div>
+        `
+            setTimeout(() => {
+                Decrypt_line_allocation(item.chi_gua_lie_biao_cover, card_id, item.link_name, {
+                    base_url: item.base_url
+                })
+            }, 500)
+            return crad_html
+
+        }).join('')}</div>`;
+
+
+
+
+
+
+    }
+    init()
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,59 @@
+<script>
+    const search_zujian = `
+    
+         <div class="layui-input-group layui-col-xs12">
+        <div class="layui-input-prefix">
+            搜索
+        </div>
+
+        <input id="chi_guo_search_text" type="text" placeholder="搜索全世界的热瓜" class="layui-input">
+        <div class="layui-input-split layui-input-suffix" style="cursor: pointer;" id="chi_guo_search_btn">
+            <i class="layui-icon layui-icon-search"></i>
+        </div>
+
+    </div>
+   
+`;
+
+    document.querySelector("#chi_gua_search").innerHTML = search_zujian
+    document.querySelector("#chi_gua_search").querySelector("#chi_guo_search_btn").addEventListener('click', () => {
+        console.log('{{ link_name }}');
+
+        const search_text = document.querySelector("#chi_guo_search_text").value;
+        if (isEmptyStr(search_text)) {
+            layer.msg('请输入搜索内容');
+            return
+        }
+        axios({
+            url: "/api/com_piwivbd_h5frz1/search/",
+            params: {
+                "keyword": search_text
+            },
+            BloodSpiderIsShowLoading: true
+        }).then(res => {
+            console.log(res.data.data);
+            renderGuaguaList(res.data, "{{ link_name }}")
+            renderPagination(res.data, "{{ link_name }}", res.data.data.this_url)
+        }).catch(err => {
+            console.log(err);
+
+            layer.msg('搜索错误:' + err);
+
+        }).finally(() => {
+            document.querySelector("#chi_guo_search_text").value = ""
+        })
+
+
+
+    })
+    document.querySelector("#chi_guo_search_text").addEventListener('keydown', function (event) {
+        if (event.keyCode === 13) {  // Check if the Enter key is pressed
+            document.querySelector("#chi_guo_search_btn").click()
+        }
+
+
+    });
+    layui.use(function () {
+        var layer = layui.layer;
+    });
+</script>

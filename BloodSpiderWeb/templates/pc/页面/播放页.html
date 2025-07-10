@@ -1,0 +1,262 @@
+{% extends "pc/template.html" %}
+
+{% block title %}播放页{% endblock %}
+
+{% block css %}
+<style>
+    .play-container {
+        max-width: 90%;
+        /* 修改为相对宽度 */
+        margin: 32px auto;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 4px 24px rgba(30, 159, 255, 0.08);
+        padding: 32px 24px 24px 24px;
+        font-family: 'HarmonyOS Sans', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .play-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: #222;
+        margin-bottom: 10px;
+        letter-spacing: 1px;
+    }
+
+    .play-meta {
+        color: #888;
+        font-size: 15px;
+        margin-bottom: 18px;
+    }
+
+    .play-video-area {
+        width: 100%;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #f0f7ff 0%, #e6f7ff 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #1E9FFF;
+        font-size: 20px;
+        margin-bottom: 24px;
+        position: relative;
+        box-shadow: 0 2px 12px rgba(30, 159, 255, 0.10);
+        overflow: hidden;
+    }
+
+    .vjs-theme-forest .vjs-control-bar {
+        border-radius: 0 0 10px 10px;
+    }
+
+    .vjs-theme-forest .vjs-big-play-button {
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1E9FFF 0%, #1890ff 100%);
+        border: none;
+        box-shadow: 0 2px 8px rgba(30, 159, 255, 0.10);
+        font-size: 2.2em;
+        width: 70px;
+        height: 70px;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .vjs-theme-forest .vjs-loading-spinner {
+        border-top-color: #1E9FFF;
+        border-left-color: #1890ff;
+    }
+
+    .play-desc {
+        font-size: 16px;
+        color: #444;
+        line-height: 1.8;
+        margin-bottom: 24px;
+        white-space: pre-line;
+    }
+
+    .play-img-list {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .play-img-list img {
+        width: calc(33.333% - 16px);
+        /* 根据屏幕宽度自适应 */
+        height: auto;
+        /* 高度自适应 */
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(30, 159, 255, 0.10);
+        background: #f6f6f6;
+        transition: transform 0.2s;
+        cursor: pointer;
+    }
+
+    .play-img-list img:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 24px rgba(30, 159, 255, 0.18);
+    }
+
+    @media (max-width: 600px) {
+        .play-container {
+            padding: 12px 2vw;
+        }
+
+        .play-title {
+            font-size: 18px;
+        }
+
+        .play-video-area {
+            font-size: 15px;
+        }
+
+        .play-img-list img {
+            width: calc(50% - 16px);
+            /* 在小屏幕下调整图片宽度 */
+        }
+    }
+</style>
+
+
+{% endblock %}
+
+{% block body %}
+{% include 'pc/组件/页面组件/普通返回组件.html' %}
+
+<div class="play-container layui-anim layui-anim-up">
+    <div class="play-title" id="play-title"></div>
+    <div class="play-meta" id="play-meta"></div>
+    <div class="play-video-area">
+    </div>
+    <div class="play-video">
+        <div id="player"></div>
+    </div>
+    <div class="layui-collapse" style="margin: 10px 0;">
+        <div class="layui-colla-item">
+            <div class="layui-colla-title">文章内容</div>
+            <div class="layui-colla-content layui-show">
+            </div>
+        </div>
+    </div>
+    <!-- <div class="play-desc">
+
+    </div> -->
+    <div class="layui-margin-2 ">
+        {% include 'pc/组件/页面组件/收藏本条吃瓜详情.html' %}
+    </div>
+    <div class="play-img-list">
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="/static/utils/hls.min.js"></script>
+
+<script src="/static/utils/playerjs.js"></script>
+
+<script>
+
+
+
+    window.onload = function () {
+        window.Hls = Hls;
+        layui.use(function () {
+            var layer = layui.layer;
+            var util = layui.util;
+            util.on('lay-on', {
+                'show_images': function () {
+                    let images = document.querySelectorAll(".play-img-list img");
+                    let images_list = [];
+                    for (let i = 0; i < images.length; i++) {
+                        let image = images[i];
+                        images_list.push({
+                            "alt": image.alt,
+                            "pid": i,
+                            "src": image.src,
+                        })
+                    }
+                    layer.photos({
+                        photos: {
+                            "title": "Photos Demo",
+                            "start": 0,
+                            "data": images_list
+                        }
+                    });
+                }
+            })
+        })
+
+        async function init() {
+            // 获取详情url
+            let detail_url = '{{ decode_base64_xiang_qing_ye_url }}'
+            let response = await axios({
+                url: "/api/com_piwivbd_h5frz1/gossip-detail/?url=" + detail_url,
+                BloodSpiderIsShowLoading: true
+            })
+
+
+
+
+            window.play_response = response.data;
+            response = response.data.data
+            if (response.shi_fo_wei_chi_gua_xiang_qing_lie_biao_he_ji) {
+                if (response.m3u8_play_url == "") {
+                    // 先把本次请求的数据保存在本地，不要在另外的合集页面再次请求
+                    localStorage.setItem("chi_gua_he_ji_shu_ju", JSON.stringify([window.play_response]))
+                    // 跳转到合集列表页
+                    var loadIndex = layer.msg('加载中', {
+                        icon: 16,
+                        shade: 0.01
+                    });;
+
+                    setTimeout(() => {
+                        layer.close(loadIndex)
+                        location.href = `/he_ji_lie_biao_ye/{{ link_name }}/{{ encode_base64_xiang_qing_ye_url }}/`;
+                    }, 1000);
+                }
+            }
+            is_collect(response)
+
+
+            document.querySelector("#play-title").innerHTML = response.chi_gua_lie_biao_biao_ti
+            document.querySelector(".layui-colla-content").innerHTML = response.chi_guo_xiang_qing_nei_ro
+            document.querySelector("#play-meta").innerHTML = response.chi_gua_lie_biao_shang_xian_shi_jian
+            let img_list_doc = document.querySelector(".play-img-list")
+            let img_list_html = ""
+
+            response.chi_gua_xiang_qing_zhao_pian_lie_biao.forEach(item => {
+
+                let card_id = item.split("/")[6].split(".")[0]
+
+                var img = `<img alt="蜘蛛爆料~强大的资源引擎等你来享受!" lay-on="show_images" class="card-id_${card_id}" />`
+                img_list_html += img;
+                Decrypt_line_allocation(item, card_id, '{{ link_name }}', {
+                    base_url: response.base_url
+                })
+
+
+            })
+            img_list_doc.innerHTML = img_list_html;
+
+            console.log(response,);
+            console.log(response.m3u8_play_url);
+
+            var player = new Playerjs({
+                id: "player",
+                file: response.m3u8_play_url,
+                poster: "/media/sys/logo.png",
+                title: "感谢蜘蛛提供服务支持",
+                lang: "zh"
+            });
+
+
+        }
+        setTimeout(() => {
+            init()
+        }, 1000);
+    }
+
+</script>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "pc/template.html" %}
+{% block title %}目录索引{% endblock %}
+{% block css %}
+<style>
+    body {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #1E9FFF 0%, #1890ff 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'HarmonyOS Sans', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+    }
+    .dir-card {
+        background: rgba(255,255,255,0.95);
+        box-shadow: 0 8px 32px 0 rgba(30,159,255,0.13), 0 1.5px 6px 0 rgba(24,144,255,0.08);
+        border-radius: 16px;
+        padding: 36px 32px 32px 32px;
+        max-width: 520px;
+        width: 100%;
+        text-align: left;
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+    .dir-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: #222;
+        margin-bottom: 18px;
+        letter-spacing: 1px;
+        text-align: center;
+    }
+    .dir-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 18px 0;
+    }
+    .dir-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+    }
+    .dir-list li:last-child {
+        border-bottom: none;
+    }
+    .dir-list a {
+        color: #1E9FFF;
+        text-decoration: none;
+        transition: color 0.2s;
+        font-weight: 500;
+    }
+    .dir-list a:hover {
+        color: #1890ff;
+        text-decoration: underline;
+    }
+    .layui-btn-home {
+        display: block;
+        margin: 24px auto 0 auto;
+        background: linear-gradient(90deg, #1E9FFF 0%, #1890ff 100%);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        padding: 10px 36px;
+        box-shadow: 0 2px 8px rgba(30,159,255,0.10);
+        transition: box-shadow 0.2s, transform 0.2s;
+        font-weight: 500;
+        text-align: center;
+    }
+    .layui-btn-home:hover {
+        box-shadow: 0 6px 24px rgba(30,159,255,0.18);
+        transform: translateY(-2px) scale(1.03);
+        background: linear-gradient(90deg, #1890ff 0%, #1E9FFF 100%);
+    }
+    @media (max-width: 480px) {
+        .dir-card {
+            padding: 18px 4px 18px 4px;
+            max-width: 98vw;
+        }
+        .dir-title {
+            font-size: 18px;
+        }
+        .dir-list li {
+            font-size: 14px;
+        }
+    }
+</style>
+{% endblock %}
+{% block body %}
+<div class="dir-card layui-anim layui-anim-up">
+    <div class="dir-title">目录索引</div>
+    <ul class="dir-list">
+      {% if directory != "/" %}
+      <li><a href="../">../</a></li>
+      {% endif %}
+      {% for f in file_list %}
+      <li><a href="{{ f|urlencode }}">{{ f }}</a></li>
+      {% endfor %}
+    </ul>
+    <a href="/" class="layui-btn layui-btn-home">返回首页</a>
+</div>
+{% endblock %}
+{% block js %}
+<script>
+layui.use(function(){
+    // 可选：页面动画或交互
+});
+</script>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "pc/template.html" %}
+
+{% block title %}{% endblock %}
+
+{% block css %}
+
+
+<script>
+    let nav_click;
+</script>
+{% endblock %}
+
+
+{% block body %}
+{% include 'pc/组件/页面组件/普通返回组件.html' %}
+<div class="layui-card">
+    <div class="layui-card-header  ">
+
+    </div>
+    <div class="layui-card-body ">
+        <div class="layui-card-body">
+            {% include 'pc/组件/页面组件/吃瓜列表.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+
+    async function init(cxqq) {
+        const line_id = "{{ link_name }}"
+        let data = null;
+
+        if (cxqq) {
+            // 重新请求数据
+            console.log("重新请求数据");
+            
+        } else {
+            // 读取本地的数据
+            let chi_gua_he_ji_shu_ju = localStorage.getItem("chi_gua_he_ji_shu_ju")
+            if (!chi_gua_he_ji_shu_ju) {
+                init(true)
+                return
+            }
+            chi_gua_he_ji_shu_ju = JSON.parse(chi_gua_he_ji_shu_ju)
+            console.log("本地储存的chi_gua_he_ji_shu_ju: ", chi_gua_he_ji_shu_ju);
+            data = chi_gua_he_ji_shu_ju[0]
+            data.data.blog_title = data.data.chi_gua_lie_biao_biao_ti
+        }
+
+        // 渲染吃瓜列表
+        renderGuaguaList(data, line_id)
+    }
+    init(false)
+
+
+</script>
+
+{% endblock %}

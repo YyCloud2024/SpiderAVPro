@@ -1,0 +1,103 @@
+<div class="layui-card">
+    <div class="layui-card-header">
+        <button id="collect_button" onclick="collect()" type="button"
+            class="layui-btn layui-btn-normal layui-btn-radius">
+            <span>收藏</span>
+            <i class="layui-icon layui-icon-rate-solid layui-font-12"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+
+
+    // 判断这个吃瓜有没有被收藏过函数
+    function is_collect(response) {
+
+        if (localStorage.getItem("chi_gua_collect")) {
+            let chi_gua_collect = JSON.parse(localStorage.getItem("chi_gua_collect"))
+            chi_gua_collect.forEach(item => {
+                if (
+                    BloodSpiderPublic_isDataIncluded(item.chi_gua_lie_biao_biao_ti, response.chi_gua_lie_biao_biao_ti) &&
+                    BloodSpiderPublic_isDataIncluded("{{ decode_base64_xiang_qing_ye_url }}".split("/").splice(3).join("/"), item.chi_guo_xiang_qing_ye_url)
+                ) {
+                    document.querySelector("#collect_button").classList.add("layui-bg-red")
+                    document.querySelector("#collect_button span").innerHTML = "已收藏"
+                    document.querySelector("#collect_button").classList.remove("layui-btn-normal")
+
+                }
+
+            });
+
+        }
+    }
+
+    function collect() {
+        // 收藏 decode_base64_xiang_qing_ye_url
+
+        if (!window.play_response) {
+            layer.msg("Not Data");
+            return;
+        } else if (document.querySelector("#collect_button").classList.contains("layui-bg-red")) {
+            layer.msg("已收藏")
+            var index = layer.confirm('你当前已收藏，是否取消收藏？', { icon: 3, title: "再次请求询问您:" }, function () {
+
+                
+                // layer.msg('点击确定的回调', { icon: 1 });
+                let chi_gua_collect = JSON.parse(localStorage.getItem("chi_gua_collect"))
+                chi_gua_collect.forEach((item, index) => {
+                    if (
+                        BloodSpiderPublic_isDataIncluded(item.chi_gua_lie_biao_biao_ti, window.play_response.data.chi_gua_lie_biao_biao_ti) &&
+                        BloodSpiderPublic_isDataIncluded("{{ decode_base64_xiang_qing_ye_url }}".split("/").splice(3).join("/"), item.chi_guo_xiang_qing_ye_url)
+                    ) {
+                        chi_gua_collect.splice(index, 1)
+                        console.log(chi_gua_collect);
+
+                        localStorage.setItem("chi_gua_collect", JSON.stringify(chi_gua_collect))
+                        document.querySelector("#collect_button").classList.remove("layui-bg-red")
+                        document.querySelector("#collect_button span").innerHTML = "收藏"
+                        document.querySelector("#collect_button").classList.add("layui-btn-normal")
+
+                        // 关闭
+                        layer.close(index);
+                        layer.msg("取消收藏成功")
+                    }
+                })
+            });
+            return
+        }
+
+        const play_data = window.play_response.data;
+        const chi_gua_lie_biao_cover = atob(getUrlParam("cover"));
+        const chi_gua_lie_biao_biao_ti = play_data.chi_gua_lie_biao_biao_ti;
+        const chi_guo_xiang_qing_ye_url = '{{ decode_base64_xiang_qing_ye_url }}'.split("/").splice(3).join('/')
+        const base_url = play_data.base_url
+        // 制作收藏字典
+        const collect_dict = {
+            chi_gua_lie_biao_cover,
+            chi_gua_lie_biao_biao_ti,
+            chi_guo_xiang_qing_ye_url,
+            "link_name": "{{ link_name }}",
+            base_url
+        }
+
+        if (prependOrCreate("chi_gua_collect", collect_dict)) {
+            layer.msg("收藏吃瓜成功")
+            document.querySelector("#collect_button").classList.add("layui-bg-red")
+            document.querySelector("#collect_button span").innerHTML = "已收藏"
+            document.querySelector("#collect_button").classList.remove("layui-btn-normal")
+        } else {
+            layer.msg("收藏吃瓜失败")
+        }
+
+
+
+        return
+
+
+
+
+
+
+    }
+</script>

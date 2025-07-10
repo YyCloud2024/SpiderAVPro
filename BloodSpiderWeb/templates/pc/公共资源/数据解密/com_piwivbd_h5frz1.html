@@ -1,0 +1,72 @@
+<script>
+    var ab2b64 = function (t) {
+        return new Promise(function (e) {
+            const n = new Blob([t]);
+            const r = new FileReader();
+            r.onload = function (t) {
+                const n = t.target.result;
+                const r = n.substring(n.indexOf(",") + 1);
+                e(r);
+            };
+            r.readAsDataURL(n);
+        });
+    };
+
+    // 标记zzz.js是否已加载
+    var zzzJsLoaded = false;
+    var zzzJsLoading = false;
+    var zzzJsLoadCallbacks = [];
+
+    function ensureZzzJs(additional_parameters, callback) {
+        if (typeof decryptImage === 'function') {
+            callback && callback();
+            return;
+        }
+        if (zzzJsLoaded) {
+            callback && callback();
+            return;
+        }
+        zzzJsLoadCallbacks.push(callback);
+        if (zzzJsLoading) return;
+        zzzJsLoading = true;
+        var script = document.createElement('script');
+        script.src = additional_parameters.base_url + "/usr/plugins/tbxw/js/zzz.js";
+        script.async = false; // 同步加载
+        script.onload = function () {
+            zzzJsLoaded = true;
+            zzzJsLoading = false;
+            zzzJsLoadCallbacks.forEach(cb => cb && cb());
+            zzzJsLoadCallbacks = [];
+        };
+        script.onerror = function () {
+            zzzJsLoading = false;
+            zzzJsLoadCallbacks = [];
+            console.error('zzz.js 加载失败');
+        };
+        document.head.appendChild(script);
+    }
+
+    function loadBannerDirect(image_url, card_id, additional_parameters) {
+        ensureZzzJs(additional_parameters, function () {
+            layui.use(function () {
+                var element = layui.element;
+                var $ = layui.$;
+                $.ajax(image_url, {
+                    xhrFields: { responseType: 'arraybuffer' }
+                }).then((res) => {
+                    ab2b64(res).then((base64str) => {
+                        let ary = image_url.split('.'), decryptStr = decryptImage(base64str);
+                        if(document.querySelector(".card-id_" + card_id)) {
+                        document.querySelector(".card-id_" + card_id).src = "data:image/" + ary.pop() + ";base64," + decryptStr
+
+                        }else {
+                            console.log("操作频繁 原因: 不等待图片加载完成就切换了下一组数据导致无法定位并渲染图片");
+                            
+                        }
+                        
+                    });
+                })
+            });
+        });
+    }
+</script>

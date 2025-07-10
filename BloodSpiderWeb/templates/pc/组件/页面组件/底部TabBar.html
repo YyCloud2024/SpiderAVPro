@@ -1,0 +1,153 @@
+<style>
+    body {
+        padding-bottom: 80px;
+        /* 为底部导航栏留出空间 */
+    }
+
+    /* 底部导航栏样式 */
+    .mobile-tabbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #ffffff;
+        border-top: 1px solid #e6e6e6;
+        display: flex;
+        justify-content: space-around;
+        padding: 6px 0 2px 0;
+        z-index: 999;
+        /* 使用环境变量计算安全距离 */
+        padding-bottom: env(safe-area-inset-bottom, 10px);
+    }
+
+    /* 导航项样式 */
+    .tabbar-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #777777;
+        text-decoration: none;
+        font-size: 12px;
+        padding: 0 15px;
+        /* 增加水平内边距 */
+    }
+
+    /* 图标样式 */
+    .tabbar-icon {
+        font-size: 22px;
+        margin-bottom: 2px;
+    }
+
+    /* 高亮状态 */
+    .layui-this {
+        color: #1E9FFF;
+    }
+
+    .pcNav {
+        background-color: #393D49;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 999;
+    }
+
+    .m-t-100 {
+        margin-top: 60px;
+    }
+</style>
+<div class="">
+    <ul class="layui-nav pcNav" style="display: flex; justify-content: space-between;">
+        <li class="layui-nav-item" style="margin-left: auto; margin-right: 50px;">
+            <a href="javascript:;">
+                <img src="https://unpkg.com/outeres@0.0.10/demo/avatar/1.jpg" class="layui-nav-img">
+            </a>
+            <dl class="layui-nav-child">
+                <dd><a href="/web/my_collect/">我的收藏</a></dd>
+                
+            </dl>
+        </li>
+    </ul>
+</div>
+<!-- 底部导航栏 -->
+<div class="mobile-tabbar layui-hide">
+    <a href="#" class="tabbar-item ">
+        <i class="layui-icon layui-icon-home tabbar-icon"></i>
+        <span>首页</span>
+    </a>
+    <a href='/web/my_collect/'
+        class="tabbar-item my_collect {% if request.path == '/web/my_collect/' %} layui-this {% endif %}">
+        <i class="layui-icon layui-icon-user tabbar-icon"></i>
+        <span>我的收藏</span>
+    </a>
+</div>
+
+<script>
+
+
+
+
+
+
+    // 示例：点击导航项切换高亮状态
+    layui.use(function () {
+        var $ = layui.jquery;
+        // 页面加载完成后的初始化
+        $(document).ready(function () {
+            console.log('线路管理页面加载完成');
+
+            // 检测设备类型并调整显示
+            function adjustForDevice() {
+                var isMobile = window.innerWidth <= 768;
+                if (isMobile) {
+                    console.log('移动端设备检测');
+                    $(".mobile-tabbar").removeClass("layui-hide")
+                    $(".pcNav").addClass("layui-hide")
+                    $("#chi_gua_search").removeClass("m-t-100")
+                    $("#ptfh_01").removeClass("m-t-100")
+                } else {
+                    console.log('PC端设备检测');
+                    $(".mobile-tabbar").addClass("layui-hide")
+                    $(".pcNav").removeClass("layui-hide")
+                    $("#chi_gua_search").addClass("m-t-100")
+                    $("#ptfh_01").addClass("m-t-100")
+                }
+            }
+
+            // 页面加载时检测
+            adjustForDevice();
+
+            // 窗口大小改变时重新检测
+            $(window).resize(function () {
+                adjustForDevice();
+            });
+
+            // 可以在这里添加页面初始化逻辑
+            // 比如从服务器获取线路数据等
+        });
+
+        console.log(JSON.parse(localStorage.getItem("home_index"))[0] == "{{ request.path }}");
+
+        if (JSON.parse(localStorage.getItem("home_index"))[0] == "{{ request.path }}") {
+            $(".tabbar-item").eq(0).addClass("layui-this")
+        }
+
+        // 点击导航项事件
+        $('.tabbar-item').on('click', function () {
+            if ($(this).index() == "0") {
+                // 判断本地有没有对首页的默认设置?如果没有就默认返回线路首页
+                if (!localStorage.getItem("home_index")) {
+                    console.log("没有默认首页设置");
+                    window.location.href = "/"
+                } else {
+                    const line = JSON.parse(localStorage.getItem("home_index"))[0]
+                    location.href = line
+                    // 移除其他项的高亮状态
+                    $('.tabbar-item').removeClass('layui-this');
+                    // 添加当前项的高亮状态
+                    $(this).addClass('layui-this');
+                }
+            }
+        });
+    });
+</script>
