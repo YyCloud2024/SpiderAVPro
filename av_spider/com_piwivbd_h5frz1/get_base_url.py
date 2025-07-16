@@ -80,7 +80,7 @@ class LinkGeneratorChecker:
     
     # 获取域名
     def get_domain_html_text(self):
-        html_text =  base64.b64decode(requests.get("https://www.ieuqnmp.xyz/").text.split("document.write(Base64.decode('")[-1].split("'));")[0]).decode('utf-8') 
+        html_text =  base64.b64decode(requests.get("https://www.ulvlinv.xyz/").text.split("document.write(Base64.decode('")[-1].split("'));")[0]).decode('utf-8')
         return html_text
 
     def add_words(self, new_words: List[str]) -> None:

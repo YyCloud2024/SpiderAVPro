@@ -16,4 +16,7 @@ urlpatterns = [
 
     # 分页转换器
     path('page-converter/', com_piwivbd_h5frz1_01.page_converter, name='page_converter'),
+
+    # 获取最新的图片域名
+    path('get_newest_image_domain/', com_piwivbd_h5frz1_01.get_newest_image_domain),
 ]

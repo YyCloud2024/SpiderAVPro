@@ -17,6 +17,10 @@ def get_classifications(request):
         return response_dict(code=1, message="请求方式错误", data=None)
 
 
+# 获取最新的图片域名
+def get_newest_image_domain(request):
+    return response_dict(data=spider.get_newest_image_domain())
+
 def get_gossip_list(request):
     """获取吃瓜列表"""
     if request.method == "GET":

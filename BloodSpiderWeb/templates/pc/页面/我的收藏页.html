@@ -395,6 +395,40 @@
         const container = document.getElementById('guaguaListContainer');
         console.log(all_data);
 
+        // 首先检查一下本地图片是否可以使用
+        if (all_data.length > 0) {
+            const image_url = all_data[0].chi_gua_lie_biao_cover;
+            // 发一个请求看看图片是否可以使用
+            try {
+                const response = await fetch(image_url);
+                if (response.ok) {
+                    console.log('图片可以使用');
+                }else {
+                    console.log('图片无法使用');
+                }
+            }
+            catch (error) {
+                console.error('图片无法使用');
+
+                // 请求新的图片域名
+                const new_image_url = await axios({
+                    method: 'get',
+                    url: '/api/com_piwivbd_h5frz1/get_newest_image_domain/',
+                    BloodSpiderIsShowLoading: true,
+                    BloodSpiderLoadingTitle: "图片不可用,正在更换新图片~"
+                })
+                const image_domain = new_image_url.data.data.image_domain
+                all_data = all_data.map(item => {
+                    // 获取请求http或者还是https
+                    const http_or_https = image_url.split("://")[0]
+                    item.chi_gua_lie_biao_cover = http_or_https + "://" + image_domain + "/" + item.chi_gua_lie_biao_cover.split("/").slice(3).join('/')
+                    return item
+                })
+                console.log("图片更新成功")
+                localStorage.setItem("chi_gua_collect", JSON.stringify(all_data))
+            }
+        }
+
 
         container.innerHTML = `
         <div class="delete-operation-bar" id="deleteOperationBar">
@@ -402,7 +436,6 @@
             <button class="delete-selected-btn" onclick="deleteSelectedCollections()">删除选中</button>
         </div>
         <div class="guagua-list">${all_data.map(item => {
-            console.log(item.chi_gua_lie_biao_cover);
 
             let card_id = item.chi_gua_lie_biao_cover.split("/").slice(3).join('').split(".")[0]
             var crad_html = `

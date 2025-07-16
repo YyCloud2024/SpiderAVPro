@@ -21,7 +21,6 @@ class PiwivbdH5frz1:
             'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
         }
         self.common_utils = GeneralToolkit()
-        
 
         # 敏感词列表
         self.sensitive_words = [
@@ -29,9 +28,9 @@ class PiwivbdH5frz1:
             "51"
         ]
 
-
     def _get_base_url(self):
         if self.debug is False:
+            print("走我")
             # 手动获取最新地址
             result2 = base_urls.generate_and_check_links(1)
             dqsj = json.loads(self.file_operate.read_file(self.json_config_file_path))
@@ -40,25 +39,27 @@ class PiwivbdH5frz1:
                 dqsj[0]['available_links'] = result2['available_links']
                 f.write(json.dumps(dqsj, ensure_ascii=False))
         else:
+
             result2 = json.loads(self.file_operate.read_file("link_config.json"))[0]
         return result2['available_links'][0]
-    
+
     # 负责发起请求并返回: 原html文本 | etree_HTML转换后的文本
     def _fetch_html_content(self, url):
         html_text = requests.get(f'{url}', headers=self.headers).text
         # html_text = open(url, "r", encoding="utf-8").read()
         etree_text = etree.HTML(html_text)
-        return html_text, etree_text 
+        return html_text, etree_text
 
-    # 获取吃瓜列表的分页数据
+        # 获取吃瓜列表的分页数据
+
     def _fetch_paginated_melon_list(self, chi_gua_ye_mian):
         feye_info = chi_gua_ye_mian.xpath("//*[@id='pageForm']/span/text()")
         if not feye_info:
             return {
-            "chi_gua_lie_biao_fe_ye_dang_qian_ye": 0,
-            "chi_gua_lie_biao_fe_ye_zo_fe_ye": 0,
-        }
-        
+                "chi_gua_lie_biao_fe_ye_dang_qian_ye": 0,
+                "chi_gua_lie_biao_fe_ye_zo_fe_ye": 0,
+            }
+
         feye_info = str(feye_info[0]).split("/")
         return {
             "chi_gua_lie_biao_fe_ye_dang_qian_ye": feye_info[0].strip(),
@@ -82,89 +83,87 @@ class PiwivbdH5frz1:
     def get_gossip_total_categories_cached(self):
 
         return [
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/jrbl/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "今日爆料"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/xsxy/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "学生校园"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/mxhl/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "明星黑料"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/fccg/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "反差吃瓜"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/bljp/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "必撸精品"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/mrds/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "每日大赛"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/cgxw/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "吃瓜新闻"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/rmdj/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "热门短剧"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/dyfjx/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "抖音风精选"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/hjll/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "海角乱伦"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/dmwm/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "动漫无码"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/cztz/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "寸止挑战"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/rmdg/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "热门大瓜"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/wmav/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "无码AV"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/whzq/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "网黄专区"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/thjp/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "探花精选"
-        },
-        {
-            "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/bkdg/",
-            "chi_gua_zo_fe_lei_fe_lei_ming": "必看大瓜"
-        }
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/jrbl/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "今日爆料"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/xsxy/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "学生校园"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/mxhl/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "明星黑料"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/fccg/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "反差吃瓜"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/bljp/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "必撸精品"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/mrds/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "每日大赛"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/cgxw/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "吃瓜新闻"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/rmdj/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "热门短剧"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/dyfjx/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "抖音风精选"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/hjll/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "海角乱伦"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/dmwm/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "动漫无码"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/cztz/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "寸止挑战"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/rmdg/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "热门大瓜"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/wmav/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "无码AV"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/whzq/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "网黄专区"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/thjp/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "探花精选"
+            },
+            {
+                "chi_gua_zo_fe_lei_fe_lei_id": "https://h5frz1.piwivbd.com/category/bkdg/",
+                "chi_gua_zo_fe_lei_fe_lei_ming": "必看大瓜"
+            }
         ]
-
-
 
     # 获取吃瓜列表
     def get_gossip_list(
-        self, 
-        gossip_list_url: str = None
+            self,
+            gossip_list_url: str = None
     ):
-        
+
         if gossip_list_url is None or gossip_list_url == "undefined":
             gossip_list_url = self.base_url
         else:
             gossip_list_url = gossip_list_url.strip()
-        
+
         html_text, etree_text = self._fetch_html_content(gossip_list_url)
         # 分页数据
         chi_gua_lie_biao_fe_ye = self._fetch_paginated_melon_list(etree_text)
@@ -184,7 +183,7 @@ class PiwivbdH5frz1:
                 continue
             # 标题
             chi_gua_lie_biao_biao_ti = str(archive.xpath("./a/div/div[2]/div/h2/text()")[0].strip()).replace("\n", "")
-            
+
             # 吃瓜详情页链接
             if self.common_utils.check_common_substrings(archive.xpath("./a/@href")[0], ['https', 'http']) is False:
                 chi_guo_xiang_qing_ye_url = self.base_url + archive.xpath("./a/@href")[0]
@@ -205,8 +204,8 @@ class PiwivbdH5frz1:
             })
 
         # 当前页面的位置标题
-        blog_title = self.common_utils.filter_sensitive_words(self.sensitive_words, str(etree_text.xpath("//*[@class='blog-title']/text()")[0]).strip(), "蜘蛛爆料网")
-        
+        blog_title = self.common_utils.filter_sensitive_words(self.sensitive_words, str(
+            etree_text.xpath("//*[@class='blog-title']/text()")[0]).strip(), "蜘蛛爆料网")
 
         return {
             "chi_gua_lie_biao": chi_gua_lie_biao,
@@ -220,28 +219,28 @@ class PiwivbdH5frz1:
         # 不需要的文章内容
         filtered_article_text: list = ["下载", "51", "关键词"]
 
-        shi_fo_wei_chi_gua_xiang_qing_lie_biao_he_ji:bool = False
+        shi_fo_wei_chi_gua_xiang_qing_lie_biao_he_ji: bool = False
 
         html_text, etree_text = self._fetch_html_content(detail_url)
 
         # 标题
-        chi_gua_lie_biao_biao_ti = etree_text.xpath("//*[@class='post-title ']/text() | //*[@class='post']/h1/text()")[0]
-        
+        chi_gua_lie_biao_biao_ti = etree_text.xpath("//*[@class='post-title ']/text() | //*[@class='post']/h1/text()")[
+            0]
+
         # 上线时间
         chi_gua_lie_biao_shang_xian_shi_jian = etree_text.xpath("//*[@class='post-meta']/li[2]/time/text()")[0]
-        
+
         # 整体内容
         post_content = etree_text.xpath("//*[@id='post']//*[@class='post-content']")[0]
-        
+
         ps = post_content.xpath('./p')
-      
 
         # 文章内容
         chi_guo_xiang_qing_nei_ro = ""
 
         # 吃瓜新闻详情内容的全部照片
         chi_gua_xiang_qing_zhao_pian_lie_biao = []
-        for img in  post_content.xpath(".//img"):
+        for img in post_content.xpath(".//img"):
             chi_gua_xiang_qing_zhao_pian_lie_biao.append(img.xpath("./@data-xkrkllgl")[0])
         # 吃瓜合集列表
         chi_gua_lie_biao = []
@@ -260,24 +259,21 @@ class PiwivbdH5frz1:
                     # 列表详情中的合集
                     if shi_fo_wei_chi_gua_xiang_qing_lie_biao_he_ji is False:
                         shi_fo_wei_chi_gua_xiang_qing_lie_biao_he_ji = True
-                   
+
                     chi_gua_lie_biao_zi_dian = {
                         "chi_guo_xiang_qing_ye_url": self.base_url + p.xpath("./a/@href")[0],
                         "chi_gua_lie_biao_biao_ti": chi_guo_xiang_qing_nei_ro_item,
                     }
-                    if chi_gua_xiang_qing_zhao_pian_lie_biao[-1]:
+                    if i < len(chi_gua_xiang_qing_zhao_pian_lie_biao) - 1:
                         chi_gua_lie_biao_zi_dian["chi_gua_lie_biao_cover"] = chi_gua_xiang_qing_zhao_pian_lie_biao[i]
                     else:
                         # /media/sys/asdsadasd.png
                         chi_gua_lie_biao_zi_dian["chi_gua_lie_biao_cover"] = "/media/sys/asdsadasd.png"
                     chi_gua_lie_biao.append(chi_gua_lie_biao_zi_dian)
-                
-                chi_guo_xiang_qing_nei_ro += "\n".join(chi_gua_lie_biao_xiang_qing_nei_ro) 
-         
-                continue
 
-            
-     
+                chi_guo_xiang_qing_nei_ro += "\n".join(chi_gua_lie_biao_xiang_qing_nei_ro)
+
+                continue
 
         # 获取m3u8播放链接
         m3u8_search = re.findall(r'"fullscreenWeb":false,"url":"(.*?)","poster":"","type":"m3u8"', html_text)
@@ -336,21 +332,22 @@ class PiwivbdH5frz1:
                     new_url = this_page_url + f"{page}/"
                     if this_page_url_split[5].isdigit():
                         new_url = this_page_url.replace(this_page_url_split[5], page)
-                
-                    
+
+
             else:
                 new_url = this_page_url + f"page/{page}/"
 
         return new_url
 
-
-
-
+    # 获取最新图片域名
+    def get_newest_image_domain(self) -> dict:
+        # 请求首页数据
+        image_domain = self.get_gossip_list(self.base_url)["chi_gua_lie_biao"][0]["chi_gua_lie_biao_cover"].split("/")[2]
+        return {
+            "image_domain": image_domain
+        }
 if __name__ == "__main__":
-    piwivbdh5frz1 = PiwivbdH5frz1(False)
-    print(
-     piwivbdh5frz1.base_url
-
-    )  
+    piwivbdh5frz1 = PiwivbdH5frz1(True)
+    piwivbdh5frz1.get_newest_image_domain()
     
  

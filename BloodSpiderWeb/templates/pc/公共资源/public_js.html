@@ -190,7 +190,7 @@
         window.closeAllLoading = function () {
             layer.closeAll();
         };
-        window.loading_01 = function () {
+        window.loading_01 = function (title = '拼命奔跑中~喵') {
             var othis = $(this);
             var offset = othis.data('offset');
             var fruits = [
@@ -228,7 +228,7 @@
             // 弹出位置
             layer.open({
                 type: 1,
-                title: "拼命奔跑中~喵",
+                title: title,
                 closeBtn: 0,
                 offset: "auto" || ['200px', '280px'], // 详细可参考 offset 属性
                 id: 'ID-demo-layer-offset-' + offset, // 防止重复弹出
@@ -254,9 +254,10 @@
     axios.interceptors.request.use(function (config) {
         // 在发送请求之前做些什么
         if (config.BloodSpiderIsShowLoading) {
+            let title = config.BloodSpiderLoadingTitle || '正在加载...';
             // 判断 window.loading_01() 如果是一个function 才调用
             if (typeof window.loading_01 === 'function') {
-                window.loading_01()
+                window.loading_01(title)
             } else {
                 layer.load(2);
             }

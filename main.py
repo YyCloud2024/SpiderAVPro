@@ -1,6 +1,1 @@
-def main():
-    print("Hello from spideravpro!")
-
-
-if __name__ == "__main__":
-    main()
+print("https://pic.hnsqpf.cn/upload_01/xiao/20241219/2024121921515834738.jpeg".split("/"))
