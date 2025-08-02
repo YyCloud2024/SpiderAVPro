@@ -276,7 +276,7 @@ class PiwivbdH5frz1:
                 continue
 
         # 获取m3u8播放链接
-        m3u8_search = re.findall(r'"fullscreenWeb":false,"url":"(.*?)","poster":"","type":"m3u8"', html_text)
+        m3u8_search = re.findall(r'"video":{"url":"(.*?)","pic":', html_text)
         if len(m3u8_search) == 0:
             m3u8_search = ""
         else:
@@ -348,6 +348,6 @@ class PiwivbdH5frz1:
         }
 if __name__ == "__main__":
     piwivbdh5frz1 = PiwivbdH5frz1(True)
-    piwivbdh5frz1.get_newest_image_domain()
+    piwivbdh5frz1.get_gossip_detail_data("https://BloodSpiderAV.vuexigs.top/archives/133430/")
     
  
